@@ -1,0 +1,102 @@
+            /* // 從 inputTextBox 中獲取要執行的 cmd 指令
+            string command = inputTextBox.Text.Trim();
+            // 解析超時時間，預設為 5 秒
+            if (!int.TryParse(timeoutTextBox.Text.Trim(), out int timeoutMilliseconds))
+            {
+                MessageBox.Show("請輸入有效的超時時間（毫秒）。");
+                return;
+            }
+            if (string.IsNullOrEmpty(command))
+            {
+                MessageBox.Show("請輸入要執行的指令。");
+                return;
+            }
+            
+           
+            // 建立一個 CancellationTokenSource 用於實現超時功能
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            // 建立一個 ProcessStartInfo 物件設定要執行的 cmd 指令
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",               // 指定要執行的程式（cmd.exe）
+                Arguments = "/c " + command,        // /c 參數告訴 cmd.exe 執行完指令後退出
+                RedirectStandardOutput = true,      // 從標準輸出取得資料
+                RedirectStandardError = true,       // 從標準錯誤取得資料
+                UseShellExecute = false,            // 不啟動新的 shell 程序
+                CreateNoWindow = true               // 不顯示 cmd 視窗
+            };
+            // 建立一個新的 Process 物件並設定其啟動資訊
+          
+            Process process = new Process();
+            process.StartInfo.FileName = "cmd.exe";
+            process.StartInfo = psi;  // 設定啟動資訊
+
+            // 初始化 Stopwatch 並開始計時
+            stopwatch = Stopwatch.StartNew();
+            // 建立一個新的 Process 物件並設定其啟動資訊
+            // using (Process process = new Process())
+            // {
+            // process.StartInfo = psi;  // 設定啟動資訊
+
+            // 開始執行命令
+            process.Start();
+            
+            // 使用 Task.Run 在非主執行緒上等待超時
+            var timeoutTask = Task.Run(() =>
+                {
+                    if (!process.WaitForExit(timeoutMilliseconds))
+                    {
+                        // 如果超時，則取消進程
+                        cancellationTokenSource.Cancel();
+                    }
+                });
+
+                try
+                {
+                    // 等待命令執行完成或超時
+                    if (!process.WaitForExit(timeoutMilliseconds))
+                    {
+                        // 如果超時，顯示提示訊息
+                        result_textbox.Text = "timeout";
+                    }
+                    else
+                    {
+                        // 如果未超時，讀取從標準輸出流取得的結果
+                        string output = process.StandardOutput.ReadToEnd();
+
+                    // 讀取從標準錯誤流取得的錯誤訊息
+                    string error = process.StandardError.ReadToEnd();
+                        // 停止計時器並獲取執行時間
+                         stopwatch.Stop();
+                         string elapsedTime = stopwatch.Elapsed.ToString();
+                    double elapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
+                    // 將結果顯示在 outputTextBox 中
+                    // outputTextBox.Text = output + Environment.NewLine + error;
+                    // 判斷命令是否成功完成（退出碼為 0）
+                    if (process.ExitCode == 0)
+                        {
+                           
+                        outputTextBox.AppendText(output + Environment.NewLine);
+                        result_textbox.Text = "PASS \t"+ $"Cmd1 TestTime: {elapsedTimeInSeconds:F2}s";
+                        }
+                        else
+                        {
+                           
+                        outputTextBox.AppendText(error + Environment.NewLine);
+                        result_textbox.Text = "NG "+ $"Cmd1 TestTime:  {elapsedTimeInSeconds:F2}s";
+                        }
+                    }
+                    outputTextBox.SelectionStart = outputTextBox.Text.Length;
+                    outputTextBox.ScrollToCaret();
+                }
+                catch (Exception ex)
+                {
+                    // 捕捉可能的異常情況
+                    result_textbox.Text = "NG:" + ex.Message ;
+                }
+                finally
+                {
+                    // 關閉進程
+                    process.Close();
+                }
+            // }*/

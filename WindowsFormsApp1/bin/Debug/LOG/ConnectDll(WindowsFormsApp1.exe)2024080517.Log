@@ -1,0 +1,12 @@
+2024-08-05 17:41:41  [          ] (TCenter1.Create)Create Start
+2024-08-05 17:41:41  [          ] File    : D:\C#\Emily_C#\ATE\source\repos\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe
+2024-08-05 17:41:41  [          ] Version : 1.0.0.0
+2024-08-05 17:41:41  [          ] (TThreadTCPServerPCClient.ServerSocketListen)TCP/IP Server Listening with :6211
+2024-08-05 17:41:41  [          ] (TCenter1.Create)Create Over
+2024-08-05 17:41:41  [          ] (SajetTransStartType)Function Execute Over
+2024-08-05 17:41:54  [          ] (TCenter1.Destroy)Destroy Start
+2024-08-05 17:41:54  [          ] (TThreadTCPServerPCClient.Destroy)Cloes TCP/IP Server Start
+2024-08-05 17:41:54  [          ] (TThreadTCPServerPCClient.Destroy)Cloes TCP/IP Server Over
+2024-08-05 17:41:54  [          ] (TThreadTCPServerRsv.Destroy)Destroy Send Thread Start
+2024-08-05 17:41:54  [          ] (TCenter1.Destroy)Destroy Over
+2024-08-05 17:41:54  [          ] (TThreadTCPServerRsv.Destroy)Destroy Send Thread Over
