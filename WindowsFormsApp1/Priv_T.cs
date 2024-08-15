@@ -84,7 +84,7 @@ public class OptStruct
         public OptAte_T opt_Ate;
 
         public OptShopFlow_T Shopflow;
-        private BarcodeScan barCodeForm;
+        public BarcodeScan barCodeForm;
 
         public OptPriv_T(BarcodeScan barCodeForm) : this()
         {

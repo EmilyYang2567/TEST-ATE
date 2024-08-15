@@ -20,7 +20,7 @@ namespace WindowsFormsApp1
 
     public partial class Form_option : Form
     {
-
+        #region declare form objects
         public Form1 MainForm;
         public BarcodeScan BarCodeForm;
         public static Form_option SelectedOption;
@@ -28,27 +28,30 @@ namespace WindowsFormsApp1
         private static bool itemsInitialized = false; // Static flag to prevent multiple initializations
         private SetupIniIP ini;
         private int lockedIndex = 0; // 例如，锁定第1项
-
-
-
         public static List<Form_option> TestOptions = new List<Form_option>();
-        private List<TestItem> testItems = new List<TestItem>();
+        private List<TestItem> testItems = new List<TestItem>();      
+        private CmdExe cmdExe; // Add this
         public delegate void TestFunction();
-        // 定义事件
         public event EventHandler ModelSaved;
-        //run CMD 
-        private static ProcessManager processManager = new ProcessManager(); //初始化
-        private static readonly object initializationLock = new object();
+        private readonly object initializationLock = new object();
+        public string TestName { get; set; }
+        public TestFunction Function { get; set; }
+        #endregion
+        public Form_option()
+        {
+            InitializeComponent();
+            this.FormClosing += Form_option_FormClosing;
+
+        }
         public Form_option(Form1 MainFormForm, BarcodeScan BarCodeForm, Shopflow Shopflow)
         {
             {
                 InitializeComponent();
                 ini = new SetupIniIP(); // Initialize the ini object
-
                 checkedListBoxTests.ItemCheck += checkedListBoxTests_ItemCheck;
-                processManager = new ProcessManager();
+                cmdExe = new CmdExe(MainFormForm);
                 this.BarCodeForm = BarCodeForm;
-                ini = new SetupIniIP();
+                
                 ModelRead(MODEL_FILENAME);
                 Apply();
 
@@ -89,8 +92,6 @@ namespace WindowsFormsApp1
             }
 
         }
-
-
         private void InitializeCustomComponents()
         {
             checkedListBoxTests.Items.Clear();
@@ -102,7 +103,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void InitializeCommonComponents()
+       /* private void InitializeCommonComponents()
         {
             ini = new SetupIniIP();
             ModelRead(MODEL_FILENAME);
@@ -115,7 +116,7 @@ namespace WindowsFormsApp1
             }
 
             InitializeCustomComponents();
-        }
+        }*/
         public class SetupIniIP
         {
             public string path;
@@ -128,7 +129,7 @@ namespace WindowsFormsApp1
                 TestName = testName;
                 Function = function;
             }
-
+            #region 定義 ini 檔案 dll
             [DllImport("kernel32")]
             private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
 
@@ -146,8 +147,9 @@ namespace WindowsFormsApp1
                 GetPrivateProfileString(Section, Key, defaultValue, temp, 255, Application.StartupPath + "\\" + inipath);
                 return temp.ToString();
             }
+            #endregion
         }
-
+        #region ini save function
         public void ModelSave(string file)
         {
             ini.IniWriteValue("ATE", "opid", textBox_opid.Text, MODEL_FILENAME);
@@ -172,7 +174,9 @@ namespace WindowsFormsApp1
             }
             // ModelSaved?.Invoke(this, EventArgs.Empty);
         }
+        #endregion
 
+        #region read ini function
         public bool ModelRead(string file)
         {
             try
@@ -205,19 +209,19 @@ namespace WindowsFormsApp1
             }
             return true;
         }
+        #endregion
 
-        public async Task<bool> TestFunction1()
+        private async Task<bool> TestFunction1(CmdExe cmdExe)
         {
             string message = "Executing TestFunction1:\n";
+            string command = "ping 8.8.8.8";
+            int timeoutMilliseconds;
 
             if (SelectedOption == null)
             {
                 MessageBox.Show("SelectedOption is not set.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-
-            string command = "ping 192.168.70.1";
-            int timeoutMilliseconds;
 
             try
             {
@@ -228,14 +232,27 @@ namespace WindowsFormsApp1
                 MessageBox.Show($"Error parsing timeout value: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-
-            MessageBox.Show(message, "OK TestFunction1", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            return true;
+            var result = await cmdExe.RunCmdAsync("cmd.exe", command, timeoutMilliseconds);
+            // Process result
+            if (result.Success)
+            {
+                // Log or handle successful result
+                MessageBox.Show(message, "OK TestFunction1", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return true;
+            }
+            else
+            {
+                // Log or handle failure
+                MessageBox.Show(message, "NG TestFunction1", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+           
         }
 
 
 
-        public async Task<bool> TestFunction2()
+        //public async Task<bool> TestFunction2()
+        private async Task<bool> TestFunction2(CmdExe cmdExe)
         {
             string message = "Executing TestFunction2:\n";
             MessageBox.Show(message, "Executing TestFunction2", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -243,7 +260,8 @@ namespace WindowsFormsApp1
 
         }
 
-        public async Task<bool> TestFunction3()
+        // public async Task<bool> TestFunction3()
+        private async Task<bool> TestFunction3(CmdExe cmdExe)
         {
             string message = "Executing TestFunction3:\n";
             MessageBox.Show(message, "Executing TestFunction3", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -264,18 +282,22 @@ namespace WindowsFormsApp1
             tabPage2.Text = "ATE Set up";
             ModelRead(MODEL_FILENAME);
         }
-
+        #region cancel btn function
         private void SpeedButton_cancel_Click(object sender, EventArgs e)
         {
             ModelRead(MODEL_FILENAME);
         }
+        #endregion
 
+        #region save ini file btn function 
         private void SpeedButton_ok_Click(object sender, EventArgs e)
         {
             ModelSave(MODEL_FILENAME);
             this.Close();
         }
+        #endregion
 
+        #region option 變數載入
         public void Apply()
         {
             OptStruct.Priv.Shopflow.ShopFlowEnable = ShopFlowEnable.Checked;
@@ -295,34 +317,33 @@ namespace WindowsFormsApp1
             ClassStruct.bc_Priv.sMAC_Prefix = MAC_Prefix.Text.Trim();
 
         }
+        #endregion
 
-        // Test item class
+        #region Test item class
         public class TestItem
         {
             public string TestName { get; set; }
-            public Func<Task<bool>> TestFunction { get; set; }
+            //public Func<Task<bool>> TestFunction { get; set; }
+            public Func<CmdExe, Task<bool>> TestFunction { get; set; }
             public bool IsChecked { get; set; }
             public string Name { get; set; }
-            public TestItem(string testName, Func<Task<bool>> testFunction)
+            public TestItem(string testName, Func<CmdExe, Task<bool>> testFunction)
             {
                 TestName = testName;
                 TestFunction = testFunction;
                 IsChecked = false;
             }
-            /*  public TestItem(string name, TestFunctionDelegate testFunction)
-              {
-                  Name = name;
-                  TestFunction = testFunction;
-              }*/
         }
+        #endregion
 
-        // Add test item
+        #region Add test item
+
         public void AddTestItem(TestItem testItem)
         {
             testItems.Add(testItem);
         }
-
-        // Run selected test items
+        #endregion
+        
         /*public void RunSelectedTests(List<string> selectedTestNames)
 
         {
@@ -338,6 +359,7 @@ namespace WindowsFormsApp1
             }
         }*/
 
+        #region option test item test btn
         private async void button_testitem_Click(object sender, EventArgs e)
         {
             var selectedTestNames = checkedListBoxTests.CheckedItems.Cast<string>().ToList();
@@ -359,12 +381,9 @@ namespace WindowsFormsApp1
             // RunSelectedTests(selectedTestNames);
             //   RunSelectedTests();
         }
+        #endregion
 
-        public string TestName { get; set; }
-        public TestFunction Function { get; set; }
-
-        // public void RunSelectedTests()
-
+        #region Run selected test items
         public async Task RunSelectedTests()
 
         {
@@ -376,15 +395,28 @@ namespace WindowsFormsApp1
                 if (selectedTestNames.Contains(testItem.TestName))
                 {
                     Console.WriteLine($"Running test: {testItem.TestName}");
+                    // Invoke the test function and pass the CmdExe instance
+                    bool success = await testItem.TestFunction(cmdExe); // Ensure cmdExe is accessible
+
+                    if (success)
+                    {
+                        Console.WriteLine($"{testItem.TestName} passed.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{testItem.TestName} failed.");
+                    }
                     //testItem.TestFunction.Invoke();
                     //await testItem.TestFunction.Invoke(); // Await the async function
                     //  await Task.Run(() => testItem.TestFunction.Invoke());
-                    await testItem.TestFunction();
+                    //await testItem.TestFunction();
                 }
             }
 
         }
+        #endregion
 
+        #region 檢查目前的索引是否鎖定
         private void checkedListBoxTests_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             // 检查当前项的索引是否为锁定项
@@ -394,11 +426,13 @@ namespace WindowsFormsApp1
                 e.NewValue = CheckState.Checked;
             }
         }
+        #endregion
 
+        #region Form_option_FormClosing
         private async void Form_option_FormClosing(object sender, FormClosingEventArgs e)
         {
-            await processManager.TerminateAllProcesses();
+            await cmdExe.TerminateAllProcesses();
         }
-
+        #endregion
     }
 }
