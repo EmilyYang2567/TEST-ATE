@@ -5,8 +5,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
+
 public class SfGlobal
 {
+
     public struct BaseInformation_T
     {
         public string sSerialNumber;    // Serial number
@@ -58,6 +60,13 @@ namespace MainForm_App
 {
     public class Shopflow
     {
+        #region 自定義的 Msg delegate
+        public delegate void FlowMsg(string sMsg);
+        public delegate void ErrMsg(string sMsg);
+        public delegate void SuccessMsg(string sMsg);
+        public delegate void ErrorMsg(string sMsg);
+        #endregion
+
         // DllImport shopflow function
         [DllImport("SajetConnect.dll")]
         public static extern bool SajetTransStart();    // Shopflow initialization and startup function

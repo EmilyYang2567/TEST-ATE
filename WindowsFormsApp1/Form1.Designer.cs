@@ -287,9 +287,9 @@
             // RichTextBox_FlowMsg
             // 
             this.RichTextBox_FlowMsg.BackColor = System.Drawing.SystemColors.MenuText;
-            this.RichTextBox_FlowMsg.Location = new System.Drawing.Point(6, 108);
+            this.RichTextBox_FlowMsg.Location = new System.Drawing.Point(6, 167);
             this.RichTextBox_FlowMsg.Name = "RichTextBox_FlowMsg";
-            this.RichTextBox_FlowMsg.Size = new System.Drawing.Size(589, 93);
+            this.RichTextBox_FlowMsg.Size = new System.Drawing.Size(589, 34);
             this.RichTextBox_FlowMsg.TabIndex = 9;
             this.RichTextBox_FlowMsg.Text = "";
             // 
@@ -318,7 +318,7 @@
             this.txt_result.Name = "txt_result";
             this.txt_result.ReadOnly = true;
             this.txt_result.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txt_result.Size = new System.Drawing.Size(600, 47);
+            this.txt_result.Size = new System.Drawing.Size(600, 106);
             this.txt_result.TabIndex = 0;
             // 
             // menuStrip1
@@ -466,7 +466,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.TextBox txt_result;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
@@ -481,6 +480,7 @@
         private System.Windows.Forms.Button Button_Stop;
         private System.Windows.Forms.RichTextBox RichTextBox_FlowMsg;
         private System.Windows.Forms.RichTextBox RichTextBox_CmdMsg;
+        public System.Windows.Forms.TextBox txt_result;
     }
 }
 

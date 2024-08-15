@@ -6,24 +6,26 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using WindowsFormsApp1;
 using static ClassStruct;
 using static OptStruct;
 using static WindowsFormsApp1.Form_option;
-
+using WindowsFormsApp1;
 
 namespace MainForm_App 
 {
     public partial class Form1 : Form
     {
-        // declare form objects
-        public Form1  MainForm; // 宣告 Form1 類型的字段 MainForm
-        public BarcodeScan BarCodeForm = new BarcodeScan();// 初始化 BarcodeScan 類別
+        #region declare form objects
+        public Form1  MainForm;
         public Form_option OptionForm; // 宣告 Form_option 類型的字段 OptionForm
-        public Shopflow Shopflow = new Shopflow(); // 初始化 Shopflow 類別
-       
+        public BarcodeScan BarCodeForm = new BarcodeScan();// 初始化 BarcodeScan 類別
+        public Shopflow Shopflow;
+        public CmdExe cmdExe;
         public OptPriv_T OptPriv;
         public Priv_T Priv;
+
+
+        #endregion
 
         #region 宣告 message font size, font, color
         public static float fMsgFontSize = 9F;
@@ -77,16 +79,12 @@ namespace MainForm_App
         {
             
             InitializeComponent();//初始化
-
+            BarcodeScan BarCodeForm = new BarcodeScan();
             LoadForm();//載入之前視窗資訊
-
-            
             OptionForm = new Form_option(this,BarCodeForm,Shopflow);//創建一個新的 Form_option 類別實例，並將 BarCodeForm /Shopflow參數傳遞給它的構造函數
-
+            Shopflow = new Shopflow();
             Priv = new Priv_T(BarCodeForm);
             OptPriv = new OptPriv_T(BarCodeForm);
-
-            // Set default status
             Button_Stop.Visible = false;
             OptPriv.bStopFlag = false;
             Button_Start.Visible = true;
@@ -140,35 +138,40 @@ namespace MainForm_App
         #region Start Scan Bar Code and Select Scan Mode 
         private async void button1_Click(object sender, EventArgs e)
         {
+            
             bool bResult;
             long lTestTimeTic;
             string sNowTime;
             string MODEL_FILENAME = "model.ini";
             Stopwatch stopWatch;
             SetupIniIP ini = new SetupIniIP();
-        TestStart:
-            OptionForm.ModelRead(MODEL_FILENAME);
-            OptionForm.Apply();
-         //   Form_option.SelectedOption?.Function.Invoke();
-           BarcodeScan BarCodeForm = new BarcodeScan();
-           BarCodeForm.BARCODE_Scan((int)SCAN_MODE.SNANDMAC);//BarCodeForm  Show Slect Scan Mode 
-
-            textBox_Fwono.Text = OptStruct.Priv.opt_Ate.WoNoDef;
-            textBox_Fopid.Text = OptStruct.Priv.opt_Ate.OpIdDef;
-            textBox_SN.Text += BarCodeForm.BARCODE_GetSn();
-            textBox_MAC.Text += BarCodeForm.BARCODE_GetMac();
-            textBox_Csn.Text += BarCodeForm.BARCODE_GetCSn();
-            stopWatch = Stopwatch.StartNew();   // 開始記錄執行時間
-
-            sNowTime = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
-            OptPriv.sStartTime = sNowTime;
-            MF_Msg($"Start test at {sNowTime}");
-
+           
             Button_Start.Visible = false;
             Button_Stop.Visible = true;
             textBox_SN.Clear();
             textBox_MAC.Clear();
             textBox_Csn.Clear();
+        TestStart:
+            OptionForm.ModelRead(MODEL_FILENAME);
+            OptionForm.Apply();
+            // Form_option.SelectedOption?.Function.Invoke();
+         
+            BarCodeForm.BARCODE_Scan((int)SCAN_MODE.SNANDMAC);//BarCodeForm  Show Slect Scan Mode 
+            
+            textBox_Fwono.Text = OptStruct.Priv.opt_Ate.WoNoDef;
+            textBox_Fopid.Text = OptStruct.Priv.opt_Ate.OpIdDef;
+            textBox_SN.Text += BarCodeForm.BARCODE_GetSn();
+            textBox_MAC.Text += BarCodeForm.BARCODE_GetMac();
+            textBox_Csn.Text += BarCodeForm.BARCODE_GetCSn();
+
+
+            stopWatch = Stopwatch.StartNew();   // 開始記錄執行時間
+          
+            sNowTime = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss}";
+            OptPriv.sStartTime = sNowTime;
+            MF_Msg($"Start test at {sNowTime}");
+
+
             OptPriv.bStopFlag = false;
             Button_Stop.Visible = true;
 
@@ -193,13 +196,33 @@ namespace MainForm_App
 
             if (OptionForm != null)
             {
+                try
+                {
+                    // 確保等待 RunSelectedTests 非同步方法執行完畢
+                    await OptionForm.RunSelectedTests();
+                }
+                catch (Exception ex)
+                {
+                    // 處理可能發生的錯誤
+                    MessageBox.Show($"An error occurred while running tests: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                // 顯示錯誤提示 OptionForm 尚未初始化
+                MessageBox.Show("No tests are selected or OptionForm is not initialized.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            /*if (OptionForm != null)
+            {
                await OptionForm.RunSelectedTests();
                  //OptionForm.RunSelectedTests();
             }
             else
             {
                 MessageBox.Show("No tests are selected or OptionForm is not initialized.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            }*/
+            //MessageBox.Show("test result is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             if (IsStopTest())
             {
                 MF_Msg("\r\n!!!!! Abort test !!!!!");
@@ -920,9 +943,7 @@ namespace MainForm_App
             *     Note: Do not need to modify.
             *------------------------------------------------------------------------
             */
-        public void ErrMsg(
-            string sMsg // [Input] Shown message string
-            )
+        public void ErrMsg(string sMsg) // [Input] Shown message string 
         {
             AddMsg(
                 sMsg,

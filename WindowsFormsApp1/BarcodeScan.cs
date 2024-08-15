@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MainForm_App; // 添加這一行
 using WindowsFormsApp1;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 /// <summary>
@@ -425,10 +426,8 @@ namespace BarCode_FormsApp
 
             return ClassStruct.bc_Priv.currMAC;
         }
-        /// <summary>
-        /// Get Bare code CSN.
-        /// </summary>
-        /// <returns></returns>
+
+        #region Get Bare code CSN.
         public string BARCODE_GetCSn()
         {
             ClassStruct.bc_Priv.currCSN = TextBox_scanCsn.Text;
@@ -439,7 +438,7 @@ namespace BarCode_FormsApp
 
             return ClassStruct.bc_Priv.currCSN;
         }
-
+        #endregion
     }
 }
 
